@@ -1,40 +1,33 @@
 using Base.Test
-function Hermitian(n)
-    #construimos primero una matriz cuadrada, nxn , con entradas en los complejos. 
-    a=rand(n,n)+1im*rand(n,n)
-    #Posteriormente se utiliza la función triu(a,1) para obtener la matriz triangular superior a partir de la entrada 1
-    b=triu(a,1)
-    #Se construye la matriz M, la cual toma b (matriz triangular superior)+la transpuesta conjugada de b 
-    #(es decir una matriz trian inferior) y luego le suma una diagonal rándom. 
-    M=b+transpose(conj(b))+Diagonal(rand(n,n))
-    return M
-end
-function daga(state::Array{Complex{Float64},1})
-    return transpose(conj(state))
+
+function random_state(dim=2::Int)
+    v=randn(1,dim)+randn(1,dim)im
+    v=v/norm(v)
+    return v'
 end
 
-function proyector(n)
-    mat = Hermitian(n)
-    A = zeros(n,n)
-    V = eigvecs(mat)
-    for i in 1:n
-        A += kron(V[:,i], daga(V[:,i]))
+# Vectorizado
+"""
+Traza parcial 
+"""
+function partial_trace_pure_bipartite_mat(state,dim,system)
+    dimtotal=length(state)[1]
+    dimcomp=Int(dimtotal/dim)
+    if system==1
+    psi=reshape(state,(dimcomp,dim))'
+        return psi*psi'
+        elseif system==2
+     psi=reshape(state,(dim,dimcomp))'
+        return psi'*psi
     end
-    return A
 end
-function identidad(n)
-    MM=Hermitian(n)
-    M=proyector(n)
-    A=eye(n)-M
-    b=0
-    for i in A
-        b+=abs(i)
-    end
-    if b>1e-5
-        return false
-    end
-    return true
-end
-@test identidad(100)
 
-@test ishermitian(Hermitian(4))
+#Elaboramos los estados A y B, para luego utilizar la función kron con ellos.
+state_A=random_state(2)
+state_B=random_state(4)
+stateAB=kron(state_A,state_B);
+
+#Verificamos la tarea
+trace(partial_trace_pure_bipartite_mat(stateAB,2,1));
+
+@test trace(partial_trace_pure_bipartite_mat(stateAB,2,1))==1
