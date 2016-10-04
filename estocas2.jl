@@ -28,6 +28,6 @@ state_B=random_state(4)
 stateAB=kron(state_A,state_B);
 
 #Verificamos la tarea
-trace(partial_trace_pure_bipartite_mat(stateAB,2,1));
+round(trace(partial_trace_pure_bipartite_mat(stateAB,2,1)));
 
-@test trace(partial_trace_pure_bipartite_mat(stateAB,2,1))==1
+@test round(trace(partial_trace_pure_bipartite_mat(stateAB,2,1)))==1
